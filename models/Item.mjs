@@ -10,11 +10,7 @@ const schema = Schema({
     type: Boolean,
     default: true
   },
-  img: {
-    name: { type: String, required: true },
-    data: { type: Buffer, required: true },
-    contentType: { type: String, required: true },
-  },
+  image: String,
   restaurant: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

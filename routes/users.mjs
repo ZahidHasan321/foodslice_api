@@ -22,9 +22,5 @@ router.get("/getUser/", async(req, res) => {
     return res.status(200).json(user)
 })
 
-router.put("/updateReg", async (req, res) => {
-    const updatedUser = await User.findOneAndUpdate({uid: req.body.uid}, {isRegistered : true})
-    return res.status(200).json(updatedUser)
-});
 
 export default router;

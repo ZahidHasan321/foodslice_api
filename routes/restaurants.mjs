@@ -1,19 +1,20 @@
 import express from "express";
 import Restaurant from "../models/Restaurant.mjs";
+import User from "../models/User.mjs";
 const router = express.Router();
 
-router.post("/", async (req, res) => {
-  console.log(req.body);
+router.post("/register-restaurant", async (req, res) => {
   const newRestaurant = new Restaurant(req.body);
   const isFound = await Restaurant.exists({
     name: req.body.name,
-    location: req.body.location,
+    owner: req.body.owner,
   });
 
   if (isFound) {
     return res.status(201).json({ message: "Already exits" });
   } else {
     const insertedRestaurant = await newRestaurant.save();
+    await User.findOneAndUpdate({_id: req.body.owner}, {isRegistered : true})
     return res.status(201).json(insertedRestaurant);
   }
 });
