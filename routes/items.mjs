@@ -1,9 +1,12 @@
-import express, { query } from "express";
+import express from "express";
+import mongoose from 'mongoose';
+import multer from "multer";
 import Item from "../models/Item.mjs";
 import Restaurant from "../models/Restaurant.mjs";
 import User from "../models/User.mjs";
+import RestaurantReviews from "../models/RestaurantReviews.mjs";
+
 const router = express.Router();
-import multer from "multer";
 
 // router.post("/", async (req, res) => {
 //   const params = req.body;
@@ -33,14 +36,16 @@ import multer from "multer";
 const upload = multer();
 
 router.post("/post-item", async (req, res, next) => {
-  const restaurant = await Restaurant.findOne({owner: req.body.restaurant}, '_id name')
-
-  if (!restaurant) {
-    // Handle the case where no restaurant is found
-    res.status(404).json({ error: "Restaurant not found" });
-    return;
-  }
   try {
+    const user = await User.findOne({uid: req.body.restaurant})
+    const restaurant = await Restaurant.findOne({owner: user._id}, '_id name')
+
+    if (!restaurant) {
+      // Handle the case where no restaurant is found
+      res.status(404).json({ error: "Restaurant not found" });
+      return;
+    }
+
     const isFound = await Item.exists({
       name: req.body.name,
       category: req.body.category,
@@ -149,6 +154,21 @@ router.post("/update-item", async (req, res) => {
     res
       .status(500)
       .json({ message: "Error updating document", error: error.message });
+  }
+});
+
+
+router.get('/get-items-by-restaurant', async (req, res) => {
+  try {
+    const restaurantId = req.query['restaurant'];
+    const items = await Item.find({ 'restaurant': new mongoose.Types.ObjectId(restaurantId.restaurantId) });
+    const restaurant = await Restaurant.findOne({_id: new mongoose.Types.ObjectId(restaurantId.restaurantId)})
+    const myReview = await RestaurantReviews.findOne({restaurant: restaurantId.restaurantId})
+    const user = await User.findOne({uid: req.query.user}, '_id')
+    res.json({restaurant, items, myReview, user});
+  } catch (error) {
+    console.error('Error:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
