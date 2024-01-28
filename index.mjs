@@ -11,6 +11,7 @@ import restaurantReviews from "./routes/restaurantReviews.mjs";
 import restaurants from "./routes/restaurants.mjs";
 import users from "./routes/users.mjs";
 import { instrument } from "@socket.io/admin-ui";
+import Notifications from "./routes/notifications.mjs";
 
 const PORT = process.env.PORT || 5050;
 const URL = process.env.DB_URL
@@ -32,6 +33,7 @@ app.use("/restaurants", restaurants);
 app.use("/items", items);
 app.use("/restaurantReviews", restaurantReviews)
 app.use("/chats", Chats)
+app.use("/notifications", Notifications);
 
 
 
@@ -61,12 +63,17 @@ const io = new Server(server);
 
 const activeConnections = {};
 
-io.on('connection', (socket) => {
+
+
+
+io.on('connection', async (socket) => {
   console.log('A  user connected');
 
   socket.on('joinChat', ({ senderId }) => {
+    console.log("index > joinChat > socketId > ",  activeConnections[senderId]);
     // const roomId = `${restaurantId}-${customerId}`
-    activeConnections[senderId] = socket.id
+    if(!activeConnections[senderId])
+      activeConnections[senderId] = socket.id
     // socket.join(roomId);
   });
 
@@ -109,8 +116,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    socket.disconnect();
-    console.log('User disconnected');
+    const disconnectedSocket = Object.entries(activeConnections).find(([key, value]) => value === socket.id);
+    if (disconnectedSocket) {
+      const [userId] = disconnectedSocket;
+      delete activeConnections[userId];
+      console.log(`User ${userId} disconnected`);
+    }
   });
 });
 

@@ -41,4 +41,17 @@ router.get("/get-reviews-by-restaurant", async (req, res) => {
   }
 });
 
+router.get("/get-reviews-of-restaurant", async (req, res) => {
+  try {
+    const user = await User.findOne({ uid: req.query.id }, "_id");
+    const restaurantId = await Restaurant.findOne({ owner: user._id }, "_id");
+    const reviews = await RestaurantReviews.find({restaurant: restaurantId._id}).populate("user").exec()
+    res.status(201).send(reviews);
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+
 export default router;

@@ -145,10 +145,10 @@ router.post("/update-item", async (req, res) => {
     if (result) {
       res.json({
         message: "Document updated successfully",
-        updatedDocument: result,
+        value: true,
       });
     } else {
-      res.status(404).json({ message: "Document not found" });
+      res.status(404).json({ value: false, message: "Document not found" });
     }
   } catch (error) {
     res
@@ -162,7 +162,7 @@ router.get('/get-items-by-restaurant', async (req, res) => {
   try {
     const restaurantId = req.query['restaurant'];
     const items = await Item.find({ 'restaurant': new mongoose.Types.ObjectId(restaurantId.restaurantId) });
-    const restaurant = await Restaurant.findOne({_id: new mongoose.Types.ObjectId(restaurantId.restaurantId)})
+    const restaurant = await Restaurant.findOne({_id: new mongoose.Types.ObjectId(restaurantId.restaurantId)}).populate("owner");
     const myReview = await RestaurantReviews.findOne({restaurant: restaurantId.restaurantId})
     const user = await User.findOne({uid: req.query.user}, '_id')
     res.json({restaurant, items, myReview, user});

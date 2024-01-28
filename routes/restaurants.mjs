@@ -52,7 +52,6 @@ router.get("/get-restaurant-by-type", async (req, res) => {
       },
     ]);
 
-    console.log(typedRestaurants);
 
     res.status(200).json(typedRestaurants);
   } catch (error) {

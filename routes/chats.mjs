@@ -5,6 +5,7 @@ const Chats = express.Router();
 
 Chats.get("/chat-history", async (req, res) => {
   try {
+
     const chat = await Chat.findOne({
       restaurant: req.query.restaurantId,
       customer: req.query.customerId,
